@@ -3,6 +3,8 @@ package ru.yandex.scooter;
 import com.github.javafaker.Faker;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import ru.yandex.scooter.clients.CourierApiClient;
@@ -25,6 +27,14 @@ public class AddCourierTests {
     String password = faker.name().firstName()+random.nextInt(100);
     String  firstName = faker.name().firstName();
 
+    final Courier courier = new Courier(
+            login,
+            password,
+            firstName
+
+    );
+
+
     @Before
     public void setUp(){
         client = new CourierApiClient();
@@ -37,12 +47,7 @@ public class AddCourierTests {
     @Description("Создание курьера с дублирующими данными. Код ответа 409")
     public void addDoubleCourierTest(){
 
-        final Courier courier = new Courier(
-                login,
-                password,
-                firstName
 
-        );
         //подготовка данных
         client.createClient(courier)
                 .then()
@@ -63,7 +68,7 @@ public class AddCourierTests {
     }
 
     @Test
-    @DisplayName("Созданеи курьера пустыми данными")
+    @DisplayName("Создание курьера пустыми данными")
     @Description("Создание курьера с пустыми данными. Код ответа 400")
     public void addCourierNullTest(){
         final Courier courier = new Courier(null, null,null);
@@ -79,15 +84,10 @@ public class AddCourierTests {
     }
 
     @Test
-    @DisplayName("Созданеи курьера с валидными данными")
+    @DisplayName("Создание курьера с валидными данными")
     @Description("Создание курьера. Код ответа 201")
     public void addCourierValidTest(){
-        final Courier courier = new Courier(
-                login,
-                password,
-                firstName
 
-        );
         boolean statusResponse = client.createClient(courier)
                 .then()
                 .statusCode(201)
@@ -96,17 +96,25 @@ public class AddCourierTests {
 
         assertTrue("Курьер не создан", statusResponse);
 
-        courierId = client.getIdCourier(courier)
-                .then()
-                .extract()
-                .path("id");
-
-        //сделала здесь, тк если вынести в @After, то будет запускаться после каждого теста, если сделать @AfterClass, то методы нужно делать статичными
-        client.deleteClient(courierId)
-                .then()
-                .statusCode(200);
 
     }
+
+    @After
+    public void tearDown(){
+
+        if(courierId != 0) {
+
+            courierId = client.getIdCourier(courier)
+                    .then()
+                    .extract()
+                    .path("id");
+
+            client.deleteClient(courierId)
+                    .then()
+                    .statusCode(200);
+        }
+    }
+
 
 
 

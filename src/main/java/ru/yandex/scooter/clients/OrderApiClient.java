@@ -20,13 +20,6 @@ public class OrderApiClient extends BaseClient {
 
     }
 
-    /*public Response getOrder(int orderId){
-        return given()
-                .spec(requestSpec())
-                .when()
-                .get(ORDER_URL + "track?t=" + orderId);
-    }*/
-
     @Step("Отмена заказа Put /api/v1/orders/cancel")
     public Response cancelledOrder(int trackId){
         return given()

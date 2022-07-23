@@ -56,6 +56,11 @@ public class LoginCourierTests {
 
         assertNotNull(id);
 
+        //очистка данных (не стала выносить в @After тк курьер создается только в этом тесте)
+        client.deleteClient(id)
+                .then()
+                .statusCode(200);
+
     }
 
     @Test
